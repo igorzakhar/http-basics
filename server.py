@@ -1,6 +1,37 @@
 import socket
 
 
+URLS = {
+    '/': 'hello index',
+    '/blog': 'hello blog'
+}
+
+
+def parse_request(request):
+    parsed = request.split(' ')
+    method = parsed[0]
+    url = parsed[1]
+    return method, url
+
+
+def generate_headers(method, url):
+    if not method == 'GET':
+        return 'HTTP/1.1 405 Method not allowed\n\n', 405
+
+    if url not in URLS:
+        return 'HTTP/1.1 404 Not found\n\n', 404
+
+    return 'HTTP/1.1 200 OK\n\n', 200
+
+
+def generate_response(request):
+    method, url = parse_request(request)
+    headers, status_code = generate_headers(method, url)
+    body = 'hello world'
+    response = '{}{}'.format(headers, body)
+    return response.encode()
+
+
 def run():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -13,7 +44,9 @@ def run():
         print(request.decode(), '\n')
         print(addr)
 
-        client_socket.sendall('hello world'.encode())
+        response = generate_response(request.decode())
+
+        client_socket.sendall(response)
         client_socket.close()
 
 
