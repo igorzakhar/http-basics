@@ -24,10 +24,20 @@ def generate_headers(method, url):
     return 'HTTP/1.1 200 OK\n\n', 200
 
 
+def generate_content(status, url):
+    if status == 404:
+        return '<h1>404</h1><p>Not found</p>'
+
+    if status == 405:
+        return '<h1>405</h1><p>Method not allowed</p>'
+
+    return '<h1>{}</h1>'.format(URLS[url])
+
+
 def generate_response(request):
     method, url = parse_request(request)
     headers, status_code = generate_headers(method, url)
-    body = 'hello world'
+    body = generate_content(status_code, url)
     response = '{}{}'.format(headers, body)
     return response.encode()
 
